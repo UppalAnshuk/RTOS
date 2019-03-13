@@ -116,22 +116,22 @@ int main(){
 					ioctl(sockets_polled[fd_index].fd, FIONREAD, &num_read);
 					
 					if(num_read==0){ //client has hung up
-						printf("client has closed the connection");
-						close(sockets_polled[fd_index].fd);
+						printf("client has closed the connection\n");
+						//close(sockets_polled[fd_index].fd);
 						//sockets_polled[fd_index].fd=-1; //so that polling is ignored till next connection
 						//sockets_polled[fd_index].events=0;
 						if((numfds-1)==fd_index)
-							continue; //if the last client leaves
+							numfds--; //if the last client leaves
 						else{
 							sockets_polled[fd_index].fd=sockets_polled[numfds-1].fd;
 							sockets_polled[fd_index].events=sockets_polled[numfds-1].events;//as new connections are added in the back
+							numfds--;
 						}
-						numfds--;
-						
+						printf("No. of active clients- %d\n",(numfds-1));
 					}
 					else{//echoing a character back
 						read(sockets_polled[fd_index].fd, &ch, 1);
-						printf("Serving a client");
+						printf("Serving a client\n");
 						if(ch>='a'&& ch<='z')
 							ch=ch-32;
 						else if(ch>='A'&& ch<='Z')
@@ -140,9 +140,9 @@ int main(){
 					}
 				}			
 			}
-			else if(sockets_polled[fd_index].revents & POLLHUP){
-				printf("client has closed the connection");
-				close(sockets_polled[fd_index].fd);
+			/*else if(sockets_polled[fd_index].revents & POLLHUP){
+				printf("client has closed the connection\n");
+				//close(sockets_polled[fd_index].fd);
 				if((numfds-1)==fd_index)
 					continue;
 				else{
@@ -150,7 +150,18 @@ int main(){
 					sockets_polled[fd_index].events=sockets_polled[numfds-1].events;				
 				}
 				numfds--;
-			}		
-		}
+			}
+			else if(sockets_polled[fd_index].revents & POLLNVAL){
+				printf("client has closed the connection\n");
+				//close(sockets_polled[fd_index].fd);
+				if((numfds-1)==fd_index)
+					continue;
+				else{
+					sockets_polled[fd_index].fd=sockets_polled[numfds-1].fd;
+					sockets_polled[fd_index].events=sockets_polled[numfds-1].events;				
+				}
+				numfds--;		
+		}*/
 	}
+}
 }
